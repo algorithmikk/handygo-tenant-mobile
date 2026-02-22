@@ -1,0 +1,51 @@
+{
+  "expo": {
+    "name": "HandyGo Tenant",
+    "slug": "handygo-tenant-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "handygo-tenant",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0f172a"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.handygo.tenant",
+      "infoPlist": {
+        "NSCameraUsageDescription": "HandyGo needs camera access to take photos of maintenance issues.",
+        "NSPhotoLibraryUsageDescription": "HandyGo needs photo library access to upload images of maintenance issues."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#0f172a"
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.handygo.tenant",
+      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "VIBRATE", "RECEIVE_BOOT_COMPLETED"]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      ["expo-notifications", { "icon": "./assets/images/icon.png", "color": "#10b981" }],
+      ["expo-image-picker", {
+        "photosPermission": "HandyGo needs access to photos to document maintenance issues.",
+        "cameraPermission": "HandyGo needs camera access to take photos of maintenance issues."
+      }]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

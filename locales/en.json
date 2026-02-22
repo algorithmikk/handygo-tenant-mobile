@@ -1,0 +1,116 @@
+{
+  "dashboard": {
+    "title": "Home",
+    "welcome": "Welcome back",
+    "activeRequests": "Active Requests",
+    "completedRequests": "Completed",
+    "pendingPayments": "Pending Payments",
+    "totalSpent": "Total Spent",
+    "recentRequests": "Recent Requests",
+    "viewAll": "View All",
+    "noRequests": "No requests yet",
+    "newRequest": "New Request",
+    "quickActions": "Quick Actions"
+  },
+  "requests": {
+    "title": "My Requests",
+    "search": "Search requests...",
+    "noRequests": "No requests found",
+    "newRequest": "New Request",
+    "requestDetails": "Request Details",
+    "status": "Status",
+    "priority": "Priority",
+    "category": "Category",
+    "description": "Description",
+    "address": "Address",
+    "assignedTo": "Assigned To",
+    "callHandyman": "Call Handyman",
+    "estimatedCost": "Estimated Cost",
+    "createdAt": "Created",
+    "trackRequest": "Track Request",
+    "cancelRequest": "Cancel Request",
+    "rateService": "Rate Service"
+  },
+  "newRequest": {
+    "title": "New Request",
+    "selectCategory": "Select Category",
+    "describe": "Describe the issue",
+    "descriptionPlaceholder": "Describe the maintenance issue in detail...",
+    "addPhotos": "Add Photos",
+    "takePhoto": "Take Photo",
+    "chooseFromLibrary": "Choose from Library",
+    "selectPriority": "Select Priority",
+    "submit": "Submit Request",
+    "submitting": "Submitting...",
+    "success": "Request submitted successfully!",
+    "error": "Failed to submit request"
+  },
+  "profile": {
+    "title": "Profile",
+    "personalInfo": "Personal Information",
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "property": "Property",
+    "unit": "Unit",
+    "paymentHistory": "Payment History",
+    "settings": "Settings",
+    "notifications": "Notifications",
+    "language": "Language",
+    "support": "Support & Help",
+    "logout": "Log Out",
+    "version": "Version"
+  },
+  "auth": {
+    "login": "Log In",
+    "email": "Email",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "noAccount": "Don't have an account?",
+    "signUp": "Sign Up",
+    "demoHint": "Demo: tenant@handygo.ae / tenant123",
+    "welcomeTitle": "HandyGo",
+    "welcomeSubtitle": "Submit & track maintenance requests"
+  },
+  "review": {
+    "title": "Rate Service",
+    "rateHandyman": "Rate your handyman",
+    "addComment": "Add a comment (optional)",
+    "commentPlaceholder": "Share your experience...",
+    "submit": "Submit Review",
+    "thanks": "Thank you for your feedback!"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong",
+    "retry": "Retry",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "back": "Back",
+    "aed": "AED"
+  },
+  "categories": {
+    "plumbing": "Plumbing",
+    "electrical": "Electrical",
+    "ac": "AC / HVAC",
+    "painting": "Painting",
+    "carpentry": "Carpentry",
+    "cleaning": "Cleaning",
+    "general": "General"
+  },
+  "priority": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "status": {
+    "pending": "Pending",
+    "assigned": "Assigned",
+    "in_progress": "In Progress",
+    "completed": "Completed",
+    "cancelled": "Cancelled"
+  }
+}
+

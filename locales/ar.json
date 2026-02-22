@@ -1,0 +1,116 @@
+{
+  "dashboard": {
+    "title": "الرئيسية",
+    "welcome": "مرحبًا بعودتك",
+    "activeRequests": "الطلبات النشطة",
+    "completedRequests": "المكتملة",
+    "pendingPayments": "المدفوعات المعلقة",
+    "totalSpent": "إجمالي الإنفاق",
+    "recentRequests": "الطلبات الأخيرة",
+    "viewAll": "عرض الكل",
+    "noRequests": "لا توجد طلبات بعد",
+    "newRequest": "طلب جديد",
+    "quickActions": "إجراءات سريعة"
+  },
+  "requests": {
+    "title": "طلباتي",
+    "search": "ابحث في الطلبات...",
+    "noRequests": "لم يتم العثور على طلبات",
+    "newRequest": "طلب جديد",
+    "requestDetails": "تفاصيل الطلب",
+    "status": "الحالة",
+    "priority": "الأولوية",
+    "category": "الفئة",
+    "description": "الوصف",
+    "address": "العنوان",
+    "assignedTo": "مخصص لـ",
+    "callHandyman": "اتصل بالفني",
+    "estimatedCost": "التكلفة المقدرة",
+    "createdAt": "تاريخ الإنشاء",
+    "trackRequest": "تتبع الطلب",
+    "cancelRequest": "إلغاء الطلب",
+    "rateService": "تقييم الخدمة"
+  },
+  "newRequest": {
+    "title": "طلب جديد",
+    "selectCategory": "اختر الفئة",
+    "describe": "صف المشكلة",
+    "descriptionPlaceholder": "صف مشكلة الصيانة بالتفصيل...",
+    "addPhotos": "إضافة صور",
+    "takePhoto": "التقط صورة",
+    "chooseFromLibrary": "اختر من المكتبة",
+    "selectPriority": "اختر الأولوية",
+    "submit": "إرسال الطلب",
+    "submitting": "جاري الإرسال...",
+    "success": "تم إرسال الطلب بنجاح!",
+    "error": "فشل في إرسال الطلب"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "personalInfo": "المعلومات الشخصية",
+    "name": "الاسم",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "property": "العقار",
+    "unit": "الوحدة",
+    "paymentHistory": "سجل المدفوعات",
+    "settings": "الإعدادات",
+    "notifications": "الإشعارات",
+    "language": "اللغة",
+    "support": "الدعم والمساعدة",
+    "logout": "تسجيل الخروج",
+    "version": "الإصدار"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "forgotPassword": "نسيت كلمة المرور؟",
+    "noAccount": "ليس لديك حساب؟",
+    "signUp": "إنشاء حساب",
+    "demoHint": "تجريبي: tenant@handygo.ae / tenant123",
+    "welcomeTitle": "هاندي جو",
+    "welcomeSubtitle": "أرسل وتتبع طلبات الصيانة"
+  },
+  "review": {
+    "title": "تقييم الخدمة",
+    "rateHandyman": "قيّم الفني",
+    "addComment": "أضف تعليقًا (اختياري)",
+    "commentPlaceholder": "شارك تجربتك...",
+    "submit": "إرسال التقييم",
+    "thanks": "شكرًا لملاحظاتك!"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ ما",
+    "retry": "إعادة المحاولة",
+    "cancel": "إلغاء",
+    "confirm": "تأكيد",
+    "save": "حفظ",
+    "back": "رجوع",
+    "aed": "درهم"
+  },
+  "categories": {
+    "plumbing": "سباكة",
+    "electrical": "كهرباء",
+    "ac": "تكييف",
+    "painting": "دهان",
+    "carpentry": "نجارة",
+    "cleaning": "تنظيف",
+    "general": "عام"
+  },
+  "priority": {
+    "low": "منخفض",
+    "medium": "متوسط",
+    "high": "عالي",
+    "urgent": "عاجل"
+  },
+  "status": {
+    "pending": "قيد الانتظار",
+    "assigned": "تم التعيين",
+    "in_progress": "قيد التنفيذ",
+    "completed": "مكتمل",
+    "cancelled": "ملغي"
+  }
+}
+
