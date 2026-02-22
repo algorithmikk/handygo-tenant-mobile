@@ -9,11 +9,37 @@ export interface CreateRequestPayload {
   images: string[];
 }
 
+// Map backend MaintenanceRequest to frontend format
+function mapRequest(r: any): MaintenanceRequest {
+  return {
+    id: r.requestId || r.id,
+    tenantId: r.tenantId || '',
+    tenantName: r.tenantName || '',
+    tenantPhone: r.tenantPhone || '',
+    companyId: r.companyId,
+    propertyAddress: r.location?.address || r.propertyAddress || r.area || '',
+    category: ((r.category || 'general').toLowerCase().replace('ac_hvac', 'ac')) as ServiceCategory,
+    description: r.description || r.title || '',
+    images: r.photoUrls || r.images || [],
+    priority: (r.priority || 'medium').toLowerCase() as RequestPriority,
+    status: (r.status || 'pending').toLowerCase().replace(/ /g, '_') as RequestStatus,
+    createdAt: r.createdAt || new Date().toISOString(),
+    assignedHandymanId: r.assignedHandymanId,
+    assignedHandymanName: r.assignedHandymanName,
+    lat: r.location?.latitude || r.lat || 25.2048,
+    lng: r.location?.longitude || r.lng || 55.2708,
+    estimatedCost: r.estimatedCost,
+    completedAt: r.completedAt,
+  };
+}
+
 export const requestService = {
   getRequests: async (status?: RequestStatus): Promise<MaintenanceRequest[]> => {
     try {
       const path = status ? `/requests?status=${status}` : '/requests';
-      return await api.get<MaintenanceRequest[]>(path);
+      const raw = await api.get<any[]>(path);
+      const list = Array.isArray(raw) ? raw : [];
+      return list.map(mapRequest);
     } catch {
       return status ? MOCK_REQUESTS.filter(r => r.status === status) : MOCK_REQUESTS;
     }
@@ -21,7 +47,8 @@ export const requestService = {
 
   getRequest: async (id: string): Promise<MaintenanceRequest> => {
     try {
-      return await api.get<MaintenanceRequest>(`/requests/${id}`);
+      const raw = await api.get<any>(`/requests/${id}`);
+      return mapRequest(raw);
     } catch {
       const found = MOCK_REQUESTS.find(r => r.id === id);
       if (!found) throw new Error('Request not found');
@@ -39,7 +66,8 @@ export const requestService = {
         priority: payload.priority,
         photoUrls: payload.images,
       };
-      return await api.post<MaintenanceRequest>('/requests', backendPayload);
+      const raw = await api.post<any>('/requests', backendPayload);
+      return mapRequest(raw);
     } catch {
       const newReq: MaintenanceRequest = {
         id: 'r' + Date.now(),

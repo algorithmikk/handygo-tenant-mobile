@@ -10,6 +10,20 @@ export interface CreateReviewPayload {
   comment: string;
 }
 
+// Map backend Review to frontend format
+function mapReview(r: any): Review {
+  return {
+    id: r.reviewId || r.id || '',
+    requestId: r.jobId || r.requestId || '',
+    handymanId: r.handymanId || '',
+    handymanName: r.handymanName || '',
+    tenantId: r.tenantId || '',
+    rating: r.rating || 0,
+    comment: r.comment || '',
+    createdAt: r.createdAt || new Date().toISOString(),
+  };
+}
+
 export const reviewService = {
   getReviews: async (): Promise<Review[]> => {
     try {
@@ -17,9 +31,13 @@ export const reviewService = {
       const userJson = await SecureStore.getItemAsync('user');
       if (userJson) {
         const user = JSON.parse(userJson);
-        if (user?.id) return await api.get<Review[]>(`/reviews/tenant/${user.id}`);
+        if (user?.id) {
+          const raw = await api.get<any[]>(`/reviews/tenant/${user.id}`);
+          return (Array.isArray(raw) ? raw : []).map(mapReview);
+        }
       }
-      return await api.get<Review[]>('/reviews');
+      const raw = await api.get<any[]>('/reviews');
+      return (Array.isArray(raw) ? raw : []).map(mapReview);
     } catch {
       return MOCK_REVIEWS;
     }
@@ -27,7 +45,8 @@ export const reviewService = {
 
   createReview: async (payload: CreateReviewPayload): Promise<Review> => {
     try {
-      return await api.post<Review>('/reviews', payload);
+      const raw = await api.post<any>('/reviews', payload);
+      return mapReview(raw);
     } catch {
       const newReview: Review = {
         id: 'rev' + Date.now(),
