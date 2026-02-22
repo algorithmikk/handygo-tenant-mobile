@@ -24,6 +24,20 @@ export default function NewRequestScreen() {
   const [submitting, setSubmitting] = useState(false);
 
   const pickImage = async (useCamera: boolean) => {
+    // Request appropriate permission first
+    if (useCamera) {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(t('newRequest.permissionRequired') || 'Permission Required', t('newRequest.cameraPermission') || 'Please allow camera access to take photos of maintenance issues.');
+        return;
+      }
+    } else {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert(t('newRequest.permissionRequired') || 'Permission Required', t('newRequest.libraryPermission') || 'Please allow photo library access to upload images.');
+        return;
+      }
+    }
     const fn = useCamera ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
     const result = await fn({ mediaTypes: ['images'], quality: 0.7 });
     if (!result.canceled && result.assets[0]) setImages(prev => [...prev, result.assets[0].uri]);
