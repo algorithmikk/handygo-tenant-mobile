@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Home, Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
 import { useAuth } from '@/src/context/AuthContext';
@@ -64,6 +64,14 @@ export default function LoginScreen() {
               {loading ? <ActivityIndicator color={Colors.white} /> : <Text style={styles.loginBtnText}>{t('auth.login')}</Text>}
             </TouchableOpacity>
 
+            <View style={styles.demoHint}>
+              <Text style={styles.demoText}>{t('auth.noAccount')} </Text>
+              <Link href="/(auth)/signup" asChild>
+                <TouchableOpacity>
+                  <Text style={{ color: Colors.amber[400], fontWeight: '600' }}>{t('auth.signup')}</Text>
+                </TouchableOpacity>
+              </Link>
+            </View>
             <View style={styles.demoHint}>
               <Text style={styles.demoText}>{t('auth.demoHint')}</Text>
             </View>
