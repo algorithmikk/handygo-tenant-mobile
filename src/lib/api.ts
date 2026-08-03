@@ -1,30 +1,24 @@
 import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
 
-// Use ALB URL directly with Host header until api.handygo.ae domain is set up
-const ALB_URL = 'http://umameats-api-alb-1654146811.us-east-1.elb.amazonaws.com/api/v1';
-const HOST_HEADER = 'api.handygo.ae';
+const extra = Constants.expoConfig?.extra ?? {};
+const API_BASE_URL =
+  (extra.apiBaseUrl as string) ||
+  process.env.EXPO_PUBLIC_API_BASE_URL ||
+  'https://api.handygo.ae/api/v1';
 
 async function getHeaders(): Promise<Record<string, string>> {
   const token = await SecureStore.getItemAsync('token');
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    'Host': HOST_HEADER,
   };
   if (token) headers['Authorization'] = `Bearer ${token}`;
-  // Add X-User-Id header from stored user for backend write operations
-  try {
-    const userJson = await SecureStore.getItemAsync('user');
-    if (userJson) {
-      const user = JSON.parse(userJson);
-      if (user?.id) headers['X-User-Id'] = user.id;
-    }
-  } catch { /* ignore */ }
   return headers;
 }
 
 async function request<T>(method: string, path: string, body?: any): Promise<T> {
   const headers = await getHeaders();
-  const res = await fetch(`${ALB_URL}${path}`, {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers,
     body: body ? JSON.stringify(body) : undefined,
@@ -45,3 +39,4 @@ export const api = {
   delete: <T>(path: string) => request<T>('DELETE', path),
 };
 
+export { API_BASE_URL };

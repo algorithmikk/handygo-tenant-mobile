@@ -46,6 +46,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "apiBaseUrl": "https://api.handygo.ae/api/v1",
+      "eas": {
+        "projectId": "handygo-tenant-mobile"
+      }
     }
   }
 }
