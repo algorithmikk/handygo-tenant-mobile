@@ -18,7 +18,16 @@
     "build:android:internal": "eas build --platform android --profile production --non-interactive --auto-submit --no-wait",
     "ota:preview": "eas update --branch preview --environment preview",
     "ota:production": "eas update --branch production --environment production",
-    "asc:audit": "node scripts/asc/audit.js"
+    "asc:audit": "node scripts/asc/audit.js",
+    "build:production": "eas build --platform ios --profile production --non-interactive --auto-submit --no-wait",
+    "build:android:production": "eas build --platform android --profile production --non-interactive --auto-submit-with-profile production-store --no-wait",
+    "submit:android:internal": "eas submit --platform android --latest --profile production --non-interactive",
+    "submit:android:production": "eas submit --platform android --latest --profile production-store --non-interactive",
+    "asc:metadata": "node scripts/asc/sync-metadata.js",
+    "asc:review-details": "node scripts/asc/set-review-details.js",
+    "asc:age-rating": "node scripts/asc/set-age-rating.js",
+    "asc:phased-release": "node scripts/asc/enable-phased-release.js",
+    "asc:submit": "node scripts/asc/submit-for-review.js"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

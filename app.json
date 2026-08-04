@@ -18,7 +18,8 @@
       "bundleIdentifier": "com.handygo.tenant",
       "infoPlist": {
         "NSCameraUsageDescription": "HandyGo needs camera access to take photos of maintenance issues.",
-        "NSPhotoLibraryUsageDescription": "HandyGo needs photo library access to upload images of maintenance issues."
+        "NSPhotoLibraryUsageDescription": "HandyGo needs photo library access to upload images of maintenance issues.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {

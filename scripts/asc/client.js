@@ -18,7 +18,7 @@ const https = require('https');
 
 const KEY_ID = process.env.ASC_KEY_ID || 'A945G7BMSZ';
 const ISSUER_ID = process.env.ASC_ISSUER_ID || '73d61e3d-d8c6-4a29-af54-9b71dcbcb92b';
-const APP_ID = process.env.ASC_APP_ID || 'REPLACE_WITH_ASC_APP_ID';
+const APP_ID = process.env.ASC_APP_ID || '6797751128';
 
 const HOST = 'api.appstoreconnect.apple.com';
 
