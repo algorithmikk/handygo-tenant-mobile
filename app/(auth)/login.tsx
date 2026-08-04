@@ -5,6 +5,7 @@ import { Link, router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Home, Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
 import { useAuth } from '@/src/context/AuthContext';
+import { notificationService } from '@/src/services/notificationService';
 import { Colors } from '@/constants/Colors';
 
 export default function LoginScreen() {
@@ -17,14 +18,15 @@ export default function LoginScreen() {
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
-    if (!email || !password) { setError('Please fill in all fields'); return; }
+    if (!email || !password) { setError(t('auth.fillFields', { defaultValue: 'Please fill in all fields' })); return; }
     setLoading(true);
     setError('');
     try {
       await login({ email, password });
+      void notificationService.registerForPushNotifications();
       router.replace('/(tabs)');
     } catch (e: any) {
-      setError(e.message || 'Login failed');
+      setError(e.message || t('auth.loginError', { defaultValue: 'Login failed' }));
     } finally { setLoading(false); }
   };
 
@@ -66,9 +68,9 @@ export default function LoginScreen() {
 
             <View style={styles.demoHint}>
               <Text style={styles.demoText}>{t('auth.noAccount')} </Text>
-              <Link href="/(auth)/signup" asChild>
+              <Link href={"/(auth)/signup" as any} asChild>
                 <TouchableOpacity>
-                  <Text style={{ color: Colors.amber[400], fontWeight: '600' }}>{t('auth.signup')}</Text>
+                  <Text style={{ color: Colors.primary[400], fontWeight: '600' }}>{t('auth.signup')}</Text>
                 </TouchableOpacity>
               </Link>
             </View>

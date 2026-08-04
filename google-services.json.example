@@ -1,0 +1,14 @@
+{
+  "project_info": {
+    "project_id": "handygo-REPLACE"
+  },
+  "client": [
+    {
+      "client_info": {
+        "android_client_info": {
+          "package_name": "com.handygo.tenant"
+        }
+      }
+    }
+  ]
+}

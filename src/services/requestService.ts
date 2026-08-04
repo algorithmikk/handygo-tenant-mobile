@@ -1,4 +1,5 @@
 import { api } from '@/src/lib/api';
+import { toApiCategory, toApiPriority } from '@/src/lib/categories';
 import type { MaintenanceRequest, RequestStatus, ServiceCategory, RequestPriority } from '@/src/types';
 
 export interface CreateRequestPayload {
@@ -6,6 +7,9 @@ export interface CreateRequestPayload {
   description: string;
   priority: RequestPriority;
   images: string[];
+  latitude?: number;
+  longitude?: number;
+  address?: string;
 }
 
 function mapRequest(r: any): MaintenanceRequest {
@@ -44,13 +48,18 @@ export const requestService = {
   },
 
   createRequest: async (payload: CreateRequestPayload): Promise<MaintenanceRequest> => {
-    const backendPayload = {
+    const backendPayload: Record<string, unknown> = {
       title: `${payload.category} - ${payload.description.substring(0, 50)}`,
       description: payload.description,
-      category: payload.category,
-      priority: payload.priority,
+      category: toApiCategory(payload.category),
+      priority: toApiPriority(payload.priority),
       photoUrls: payload.images,
     };
+    if (payload.latitude != null && payload.longitude != null) {
+      backendPayload.latitude = payload.latitude;
+      backendPayload.longitude = payload.longitude;
+    }
+    if (payload.address) backendPayload.address = payload.address;
     const raw = await api.post<any>('/requests', backendPayload);
     return mapRequest(raw);
   },
@@ -70,11 +79,14 @@ export const requestService = {
         folder: 'requests',
       });
       const blob = await (await fetch(uri)).blob();
-      await fetch(presign.uploadUrl, {
+      const putRes = await fetch(presign.uploadUrl, {
         method: 'PUT',
         headers: { 'Content-Type': 'image/jpeg' },
         body: blob,
       });
+      if (!putRes.ok) {
+        throw new Error(`Photo upload failed (${putRes.status})`);
+      }
       urls.push(presign.publicUrl);
     }
     return urls;

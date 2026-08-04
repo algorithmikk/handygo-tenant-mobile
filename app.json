@@ -28,7 +28,13 @@
       },
       "edgeToEdgeEnabled": true,
       "package": "com.handygo.tenant",
-      "permissions": ["CAMERA", "READ_EXTERNAL_STORAGE", "VIBRATE", "RECEIVE_BOOT_COMPLETED"]
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.VIBRATE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -38,20 +44,37 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      ["expo-notifications", { "icon": "./assets/images/icon.png", "color": "#10b981" }],
-      ["expo-image-picker", {
-        "photosPermission": "HandyGo needs access to photos to document maintenance issues.",
-        "cameraPermission": "HandyGo needs camera access to take photos of maintenance issues."
-      }]
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/icon.png",
+          "color": "#10b981"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "HandyGo needs access to photos to document maintenance issues.",
+          "cameraPermission": "HandyGo needs camera access to take photos of maintenance issues."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "apiBaseUrl": "https://api.handygo.ae/api/v1",
+      "apiBaseUrl": "https://handygo.vercel.app/backend/api/v1",
+      "router": {},
       "eas": {
-        "projectId": "handygo-tenant-mobile"
+        "projectId": "2867d6a4-f618-42b2-9f3e-95e7681198fd"
       }
-    }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/2867d6a4-f618-42b2-9f3e-95e7681198fd"
+    },
+    "owner": "jaw_ari"
   }
 }

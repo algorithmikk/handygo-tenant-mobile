@@ -67,7 +67,13 @@ export default function RequestsScreen() {
       </ScrollView>
       <ScrollView style={s.list} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary[400]} />}>
         {filtered.length === 0 ? (
-          <View style={s.emptyState}><ClipboardList size={40} color={Colors.gray[600]} /><Text style={s.emptyText}>{t('requests.noRequests')}</Text></View>
+          <View style={s.emptyState}>
+            <View style={s.emptyIcon}>
+              <ClipboardList size={32} color={Colors.gray[600]} />
+            </View>
+            <Text style={s.emptyTitle}>{t('requests.noRequests')}</Text>
+            <Text style={s.emptySubtitle}>{t('requests.emptyHint')}</Text>
+          </View>
         ) : (
           filtered.map(req => {
             const cat = getCategoryInfo(req.category);
@@ -112,8 +118,10 @@ const s = StyleSheet.create({
   filterText: { fontSize: 13, color: Colors.gray[400], fontWeight: '500' },
   filterTextActive: { color: Colors.white },
   list: { flex: 1, paddingHorizontal: 16 },
-  emptyState: { alignItems: 'center', paddingTop: 60, gap: 12 },
-  emptyText: { fontSize: 15, color: Colors.gray[500] },
+  emptyState: { alignItems: 'center', paddingTop: 60, paddingHorizontal: 32, gap: 8 },
+  emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: Colors.slate[800], borderWidth: 1, borderColor: Colors.gray[700], alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  emptyTitle: { fontSize: 16, fontWeight: '600', color: Colors.gray[400], textAlign: 'center' },
+  emptySubtitle: { fontSize: 14, color: Colors.gray[500], textAlign: 'center', lineHeight: 20 },
   card: { backgroundColor: Colors.slate[800], borderRadius: 14, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: Colors.gray[700] },
   cardTop: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 10 },
   catIcon: { fontSize: 24 },

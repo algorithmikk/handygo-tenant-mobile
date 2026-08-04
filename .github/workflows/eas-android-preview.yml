@@ -1,0 +1,97 @@
+# Interim Android beta while Play Console org is blocked on DUNS.
+#
+# Builds a sideloadable APK via EAS internal distribution (Expo install link).
+# Does NOT submit to Google Play — no service account required.
+#
+# When Play org + GOOGLE_SERVICE_ACCOUNT_KEY exist, prefer eas-play-internal.yml
+# (AAB → Play Internal testing). Keep this workflow for emergency sideloads.
+#
+# Required secret: EXPO_TOKEN
+# Optional: GOOGLE_SERVICES_JSON_BASE64 (push); without it the APK still installs.
+
+name: Beta - Android EAS Internal
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'assets/**'
+      - 'constants/**'
+      - 'components/**'
+      - 'locales/**'
+      - 'app.json'
+      - 'app.config.js'
+      - 'eas.json'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'EAS build profile'
+        required: true
+        default: 'preview'
+        type: choice
+        options: [preview, production]
+
+concurrency:
+  group: eas-android-preview-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: Quality gate
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  build:
+    name: EAS Android APK (no Play submit)
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write google-services.json if available
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "::notice::GOOGLE_SERVICES_JSON_BASE64 unset — build continues; push may not work"
+            exit 0
+          fi
+          echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > google-services.json
+          chmod 600 google-services.json
+
+      - name: EAS Android build (internal distribution)
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          PROFILE="${{ github.event.inputs.profile || 'preview' }}"
+          echo "Building Android profile=$PROFILE (no auto-submit)"
+          eas build \
+            --platform android \
+            --profile "$PROFILE" \
+            --non-interactive \
+            --no-wait
+
+      - name: Next steps
+        run: |
+          echo "When the build finishes, open https://expo.dev/accounts/jaw_ari/projects/handygo-tenant-mobile/builds"
+          echo "Install the APK via the Expo install page on an Android device (allow unknown sources)."
+          echo "Play Internal testing stays off until DUNS / Play org + GOOGLE_SERVICE_ACCOUNT_KEY."

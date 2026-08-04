@@ -9,6 +9,8 @@
     "recentRequests": "Recent Requests",
     "viewAll": "View All",
     "noRequests": "No requests yet",
+    "noRequestsHint": "Submit your first maintenance request to get started.",
+    "newRequestHint": "Report a maintenance issue",
     "newRequest": "New Request",
     "quickActions": "Quick Actions"
   },
@@ -16,6 +18,7 @@
     "title": "My Requests",
     "search": "Search requests...",
     "noRequests": "No requests found",
+    "emptyHint": "Try a different filter or submit a new request.",
     "newRequest": "New Request",
     "requestDetails": "Request Details",
     "status": "Status",
@@ -37,9 +40,16 @@
     "describe": "Describe the issue",
     "descriptionPlaceholder": "Describe the maintenance issue in detail...",
     "addPhotos": "Add Photos",
+    "photosHint": "Photos upload securely when you submit.",
     "takePhoto": "Take Photo",
     "chooseFromLibrary": "Choose from Library",
     "selectPriority": "Select Priority",
+    "location": "Location",
+    "locating": "Getting your location…",
+    "locationDenied": "Location unavailable. Tap to retry.",
+    "permissionRequired": "Permission Required",
+    "cameraPermission": "Please allow camera access to take photos of maintenance issues.",
+    "libraryPermission": "Please allow photo library access to upload images.",
     "submit": "Submit Request",
     "submitting": "Submitting...",
     "success": "Request submitted successfully!",
@@ -81,9 +91,11 @@
     "emiratesId": "Emirates ID",
     "firstName": "First name",
     "lastName": "Last name",
-    "demoHint": "Demo: tenant@handygo.ae / tenant123",
+    "demoHint": "Demo: tenant@pilot.handygo.ae / PilotTenant123!",
     "welcomeTitle": "HandyGo",
-    "welcomeSubtitle": "Submit & track maintenance requests"
+    "welcomeSubtitle": "Submit & track maintenance requests",
+    "fillFields": "Please fill in all fields",
+    "loginError": "Login failed"
   },
   "review": {
     "title": "Rate Service",
@@ -96,6 +108,7 @@
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong",
+    "success": "Success",
     "retry": "Retry",
     "cancel": "Cancel",
     "confirm": "Confirm",
@@ -126,4 +139,3 @@
     "cancelled": "Cancelled"
   }
 }
-

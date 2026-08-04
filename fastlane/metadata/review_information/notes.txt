@@ -1,0 +1,1 @@
+Demo login: tenant@pilot.handygo.ae — password provided via ASC_DEMO_PASSWORD secret.

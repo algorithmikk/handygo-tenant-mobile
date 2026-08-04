@@ -9,6 +9,8 @@
     "recentRequests": "الطلبات الأخيرة",
     "viewAll": "عرض الكل",
     "noRequests": "لا توجد طلبات بعد",
+    "noRequestsHint": "أرسل أول طلب صيانة للبدء.",
+    "newRequestHint": "أبلغ عن مشكلة صيانة",
     "newRequest": "طلب جديد",
     "quickActions": "إجراءات سريعة"
   },
@@ -16,6 +18,7 @@
     "title": "طلباتي",
     "search": "ابحث في الطلبات...",
     "noRequests": "لم يتم العثور على طلبات",
+    "emptyHint": "جرّب فلترًا مختلفًا أو أرسل طلبًا جديدًا.",
     "newRequest": "طلب جديد",
     "requestDetails": "تفاصيل الطلب",
     "status": "الحالة",
@@ -37,9 +40,16 @@
     "describe": "صف المشكلة",
     "descriptionPlaceholder": "صف مشكلة الصيانة بالتفصيل...",
     "addPhotos": "إضافة صور",
+    "photosHint": "يتم رفع الصور بأمان عند الإرسال.",
     "takePhoto": "التقط صورة",
     "chooseFromLibrary": "اختر من المكتبة",
     "selectPriority": "اختر الأولوية",
+    "location": "الموقع",
+    "locating": "جاري تحديد موقعك…",
+    "locationDenied": "الموقع غير متاح. اضغط لإعادة المحاولة.",
+    "permissionRequired": "الإذن مطلوب",
+    "cameraPermission": "يرجى السماح بالوصول إلى الكاميرا لالتقاط صور لمشاكل الصيانة.",
+    "libraryPermission": "يرجى السماح بالوصول إلى مكتبة الصور لرفع الصور.",
     "submit": "إرسال الطلب",
     "submitting": "جاري الإرسال...",
     "success": "تم إرسال الطلب بنجاح!",
@@ -83,7 +93,9 @@
     "lastName": "اسم العائلة",
     "demoHint": "تجريبي: tenant@handygo.ae / tenant123",
     "welcomeTitle": "هاندي جو",
-    "welcomeSubtitle": "أرسل وتتبع طلبات الصيانة"
+    "welcomeSubtitle": "أرسل وتتبع طلبات الصيانة",
+    "fillFields": "Please fill in all fields",
+    "loginError": "Login failed"
   },
   "review": {
     "title": "تقييم الخدمة",
@@ -101,7 +113,8 @@
     "confirm": "تأكيد",
     "save": "حفظ",
     "back": "رجوع",
-    "aed": "درهم"
+    "aed": "درهم",
+    "success": "Success"
   },
   "categories": {
     "plumbing": "سباكة",
@@ -126,4 +139,3 @@
     "cancelled": "ملغي"
   }
 }
-

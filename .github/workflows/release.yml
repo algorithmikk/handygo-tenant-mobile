@@ -1,0 +1,147 @@
+# Production release: git tag v1.2.3 -> App Store.
+#
+# Tagging is the freeze point. main is continuously shipped to TestFlight by
+# eas-testflight.yml; only a tag produces a release candidate for the store.
+#
+# This workflow prepares the store listing and starts the build. It does not
+# submit for review, because EAS builds plus Apple's processing take hours and
+# holding a CI job open for that is wasteful. Once the build shows up in App
+# Store Connect, run the "Submit for App Review" workflow.
+#
+# Required secrets: EXPO_TOKEN, ASC_API_KEY_BASE64, ASC_DEMO_PASSWORD
+
+name: Release - App Store
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Marketing version, e.g. 1.0.0'
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: Quality gate
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  prepare-listing:
+    name: Prepare App Store listing
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ASC_KEY_ID: ${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}
+      ASC_ISSUER_ID: ${{ vars.ASC_ISSUER_ID || '73d61e3d-d8c6-4a29-af54-9b71dcbcb92b' }}
+      ASC_APP_ID: ${{ vars.ASC_APP_ID || '6770624503' }}
+      ASC_DEMO_PASSWORD: ${{ secrets.ASC_DEMO_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Resolve version
+        id: version
+        run: |
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION="${GITHUB_REF_NAME#v}"
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Releasing $VERSION"
+
+      - name: Check tag matches app.json version
+        run: |
+          APP_VERSION=$(node -p "require('./app.json').expo.version")
+          if [ "$APP_VERSION" != "${{ steps.version.outputs.version }}" ]; then
+            echo "::error::Tag version ${{ steps.version.outputs.version }} does not match app.json version $APP_VERSION"
+            exit 1
+          fi
+
+      # Write the .p8 to a file instead of GITHUB_ENV — multiline PEM breaks
+      # the <<EOF env delimiter ("Matching delimiter not found 'EOF'").
+      - name: Decode App Store Connect key
+        env:
+          ASC_API_KEY_BASE64: ${{ secrets.ASC_API_KEY_BASE64 }}
+        run: |
+          if [ -z "$ASC_API_KEY_BASE64" ]; then
+            echo "::error::ASC_API_KEY_BASE64 secret is empty"
+            exit 1
+          fi
+          KEY_PATH="$RUNNER_TEMP/AuthKey_${ASC_KEY_ID}.p8"
+          echo "$ASC_API_KEY_BASE64" | base64 -d > "$KEY_PATH"
+          chmod 600 "$KEY_PATH"
+          echo "ASC_PRIVATE_KEY_PATH=$KEY_PATH" >> "$GITHUB_ENV"
+
+      - name: Ensure App Store version record
+        run: node scripts/asc/ensure-version.js "${{ steps.version.outputs.version }}"
+
+      - name: Sync store metadata
+        run: node scripts/asc/sync-metadata.js
+
+      - name: Set App Review details
+        run: node scripts/asc/set-review-details.js
+
+      - name: Enable phased release
+        run: node scripts/asc/enable-phased-release.js
+
+  build:
+    name: EAS production build
+    needs: prepare-listing
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write App Store Connect API key
+        env:
+          ASC_API_KEY_BASE64: ${{ secrets.ASC_API_KEY_BASE64 }}
+        run: |
+          KEY_ID="${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}"
+          mkdir -p secrets
+          echo "$ASC_API_KEY_BASE64" | base64 -d > "secrets/AuthKey_${KEY_ID}.p8"
+          chmod 600 "secrets/AuthKey_${KEY_ID}.p8"
+
+      - name: EAS build and upload to App Store Connect
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas build \
+            --platform ios \
+            --profile production \
+            --non-interactive \
+            --auto-submit \
+            --no-wait
+
+      - name: Next steps
+        run: |
+          echo "Build queued. Once App Store Connect finishes processing it, run the"
+          echo "'Submit for App Review' workflow to run the readiness audit and submit."

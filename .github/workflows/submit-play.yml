@@ -1,0 +1,112 @@
+# Promote / re-submit an Android build on Google Play.
+#
+# Use after release-android.yml leaves a production draft, or to re-push the
+# latest EAS Android build to Internal / Closed / Production.
+#
+# First-time production launches often still need a human click in Play Console
+# (declarations, Data safety publish). This workflow handles the binary track.
+#
+# Required secrets: EXPO_TOKEN, GOOGLE_SERVICE_ACCOUNT_KEY
+
+name: Submit - Play Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      track:
+        description: 'Play track'
+        required: true
+        default: 'production'
+        type: choice
+        options: [internal, production]
+      as_draft:
+        description: 'Submit production as draft (recommended until ready to go live)'
+        required: false
+        default: true
+        type: boolean
+      build_id:
+        description: 'EAS build ID (blank = latest Android production build)'
+        required: false
+        type: string
+
+jobs:
+  submit:
+    name: EAS submit Android
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Play service account key
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ -z "$GOOGLE_SERVICE_ACCOUNT_KEY" ]; then
+            echo "::error::GOOGLE_SERVICE_ACCOUNT_KEY secret is empty"
+            exit 1
+          fi
+          mkdir -p secrets
+          echo "$GOOGLE_SERVICE_ACCOUNT_KEY" | base64 -d > secrets/google-play-key.json
+          chmod 600 secrets/google-play-key.json
+
+      - name: Choose submit profile
+        id: profile
+        run: |
+          TRACK="${{ github.event.inputs.track }}"
+          if [ "$TRACK" = "internal" ]; then
+            echo "profile=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "profile=production-store" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Override releaseStatus when promoting live
+        if: ${{ github.event.inputs.track == 'production' && github.event.inputs.as_draft == 'false' }}
+        run: |
+          # eas.json production-store defaults to draft. For a live promote, write a
+          # temporary submit profile that sets releaseStatus completed.
+          node <<'NODE'
+          const fs = require('fs');
+          const eas = JSON.parse(fs.readFileSync('eas.json', 'utf8'));
+          eas.submit['production-live'] = {
+            android: {
+              ...eas.submit['production-store'].android,
+              releaseStatus: 'completed',
+            },
+          };
+          fs.writeFileSync('eas.json', JSON.stringify(eas, null, 2) + '\n');
+          NODE
+          echo "PROFILE=production-live" >> "$GITHUB_ENV"
+
+      - name: EAS submit
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          PROFILE="${PROFILE:-${{ steps.profile.outputs.profile }}}"
+          BUILD_ARGS=(--platform android --profile "$PROFILE" --non-interactive)
+          if [ -n "${{ github.event.inputs.build_id }}" ]; then
+            BUILD_ARGS+=(--id "${{ github.event.inputs.build_id }}")
+          else
+            BUILD_ARGS+=(--latest)
+          fi
+          echo "Submitting with profile $PROFILE"
+          eas submit "${BUILD_ARGS[@]}"
+
+      - name: Reminder
+        if: ${{ github.event.inputs.track == 'production' }}
+        run: |
+          echo "If Play Console still blocks 'Send for review', finish App content"
+          echo "(Data safety, content rating, target audience) and store listing graphics."

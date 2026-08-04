@@ -1,0 +1,63 @@
+{
+  "cli": {
+    "version": ">= 5.6.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "environment": "development",
+      "channel": "development",
+      "ios": {
+        "simulator": false
+      }
+    },
+    "preview": {
+      "distribution": "internal",
+      "environment": "preview",
+      "channel": "preview",
+      "ios": {
+        "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
+      }
+    },
+    "production": {
+      "autoIncrement": true,
+      "environment": "production",
+      "channel": "production",
+      "ios": {
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "jawadarifpro@gmail.com",
+        "ascAppId": "REPLACE_WITH_ASC_APP_ID",
+        "appleTeamId": "NM4ZT8W7HH",
+        "ascApiKeyPath": "./secrets/AuthKey_A945G7BMSZ.p8",
+        "ascApiKeyId": "A945G7BMSZ",
+        "ascApiKeyIssuerId": "73d61e3d-d8c6-4a29-af54-9b71dcbcb92b"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./secrets/google-play-key.json",
+        "track": "internal",
+        "releaseStatus": "completed"
+      }
+    },
+    "production-store": {
+      "android": {
+        "serviceAccountKeyPath": "./secrets/google-play-key.json",
+        "track": "production",
+        "releaseStatus": "draft"
+      }
+    }
+  }
+}

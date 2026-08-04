@@ -1,0 +1,107 @@
+# Beta channel: main -> Google Play Internal testing.
+#
+# Every push to main that touches app code produces an Android AAB for internal
+# testers (TestFlight equivalent). Production store drafts are cut by tagging
+# (release-android.yml) and promoted via submit-play.yml.
+#
+# Required GitHub Actions secrets:
+#   EXPO_TOKEN                    - https://expo.dev/accounts/jaw_ari/settings/access-tokens
+#   GOOGLE_SERVICE_ACCOUNT_KEY    - base64 of Play Console API service account JSON
+#   GOOGLE_SERVICES_JSON_BASE64   - base64 of Firebase google-services.json (optional but needed for push)
+#
+# Add [skip ci] to a commit message to skip.
+
+name: Beta - Play Internal
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'assets/**'
+      - 'constants/**'
+      - 'components/**'
+      - 'locales/**'
+      - 'app.json'
+      - 'app.config.js'
+      - 'eas.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'google-services.json'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'EAS build profile'
+        required: true
+        default: 'production'
+        type: choice
+        options: [preview, production]
+
+concurrency:
+  group: eas-android-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: Quality gate
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  build-and-submit:
+    name: EAS Android -> Play Internal
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Play service account key
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ -z "$GOOGLE_SERVICE_ACCOUNT_KEY" ]; then
+            echo "::error::GOOGLE_SERVICE_ACCOUNT_KEY secret is empty"
+            exit 1
+          fi
+          mkdir -p secrets
+          echo "$GOOGLE_SERVICE_ACCOUNT_KEY" | base64 -d > secrets/google-play-key.json
+          chmod 600 secrets/google-play-key.json
+
+      - name: Write google-services.json
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "::warning::GOOGLE_SERVICES_JSON_BASE64 not set — Android push may fail"
+            exit 0
+          fi
+          echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > google-services.json
+          chmod 600 google-services.json
+
+      - name: EAS build and auto-submit to Play Internal
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          PROFILE="${{ github.event.inputs.profile || 'production' }}"
+          echo "Building profile: $PROFILE (submit profile: production → track internal)"
+          eas build \
+            --platform android \
+            --profile "$PROFILE" \
+            --non-interactive \
+            --auto-submit \
+            --no-wait

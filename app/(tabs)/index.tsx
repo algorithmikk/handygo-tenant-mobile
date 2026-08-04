@@ -3,7 +3,7 @@ import { StyleSheet, View, Text, TouchableOpacity, ScrollView, RefreshControl, A
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
-import { Home, ClipboardList, Clock, CheckCircle, CreditCard, PlusCircle } from 'lucide-react-native';
+import { Home, ClipboardList, CheckCircle, PlusCircle, Inbox } from 'lucide-react-native';
 import { useAuth } from '@/src/context/AuthContext';
 import { requestService } from '@/src/services/requestService';
 import { getCategoryInfo, PRIORITY_COLORS, STATUS_COLORS } from '@/src/lib/mockData';
@@ -61,7 +61,7 @@ export default function DashboardScreen() {
           <PlusCircle size={24} color={Colors.white} />
           <View>
             <Text style={styles.newRequestTitle}>{t('dashboard.newRequest')}</Text>
-            <Text style={styles.newRequestSub}>Report a maintenance issue</Text>
+            <Text style={styles.newRequestSub}>{t('dashboard.newRequestHint')}</Text>
           </View>
         </TouchableOpacity>
 
@@ -88,7 +88,13 @@ export default function DashboardScreen() {
             </TouchableOpacity>
           </View>
           {recent.length === 0 ? (
-            <Text style={styles.emptyText}>{t('dashboard.noRequests')}</Text>
+            <View style={styles.emptyState}>
+              <View style={styles.emptyIcon}>
+                <Inbox size={32} color={Colors.gray[600]} />
+              </View>
+              <Text style={styles.emptyTitle}>{t('dashboard.noRequests')}</Text>
+              <Text style={styles.emptySubtitle}>{t('dashboard.noRequestsHint')}</Text>
+            </View>
           ) : (
             recent.map(req => {
               const cat = getCategoryInfo(req.category);
@@ -135,7 +141,10 @@ const styles = StyleSheet.create({
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
   sectionTitle: { fontSize: 17, fontWeight: '700', color: Colors.white },
   viewAll: { fontSize: 13, color: Colors.primary[400], fontWeight: '600' },
-  emptyText: { fontSize: 14, color: Colors.gray[500], textAlign: 'center', paddingVertical: 24 },
+  emptyState: { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 24, gap: 8 },
+  emptyIcon: { width: 64, height: 64, borderRadius: 32, backgroundColor: Colors.slate[800], borderWidth: 1, borderColor: Colors.gray[700], alignItems: 'center', justifyContent: 'center', marginBottom: 8 },
+  emptyTitle: { fontSize: 16, fontWeight: '600', color: Colors.gray[400], textAlign: 'center' },
+  emptySubtitle: { fontSize: 14, color: Colors.gray[500], textAlign: 'center', lineHeight: 20 },
   requestCard: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', backgroundColor: Colors.slate[800], borderRadius: 14, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: Colors.gray[700] },
   requestLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
   catIcon: { fontSize: 24 },

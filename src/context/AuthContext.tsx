@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { authService } from '@/src/services/authService';
-import type { User, Tenant, LoginRequest } from '@/src/types';
+import type { User, Tenant, LoginRequest, AuthResponse } from '@/src/types';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -8,12 +8,18 @@ interface AuthContextType {
   user: User | null;
   tenant: Tenant | null;
   login: (credentials: LoginRequest) => Promise<void>;
+  setSession: (res: AuthResponse) => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  isAuthenticated: false, isLoading: true, user: null, tenant: null,
-  login: async () => {}, logout: async () => {},
+  isAuthenticated: false,
+  isLoading: true,
+  user: null,
+  tenant: null,
+  login: async () => {},
+  setSession: async () => {},
+  logout: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -26,18 +32,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     (async () => {
       try {
+        const token = await authService.getToken();
+        if (!token) return;
         const storedUser = await authService.getStoredUser();
         const storedTenant = await authService.getStoredTenant();
-        if (storedUser) { setUser(storedUser); setTenant(storedTenant); }
-      } catch (e) { console.error('Auth restore error:', e); }
-      finally { setIsLoading(false); }
+        if (storedUser) {
+          setUser(storedUser);
+          setTenant(storedTenant);
+        }
+      } catch (e) {
+        console.error('Auth restore error:', e);
+      } finally {
+        setIsLoading(false);
+      }
     })();
   }, []);
 
   const login = async (credentials: LoginRequest) => {
     const res = await authService.login(credentials);
     setUser(res.user);
-    if (res.tenant) setTenant(res.tenant);
+    setTenant(res.tenant ?? null);
+  };
+
+  const setSession = async (res: AuthResponse) => {
+    const applied = await authService.applySession(res);
+    setUser(applied.user);
+    setTenant(applied.tenant ?? null);
   };
 
   const logout = async () => {
@@ -47,9 +67,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated: !!user, isLoading, user, tenant, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        isAuthenticated: !!user,
+        isLoading,
+        user,
+        tenant,
+        login,
+        setSession,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
-

@@ -1,0 +1,93 @@
+# Beta channel: main -> TestFlight.
+#
+# Every push to main that touches app code produces a build for internal
+# testers. This is the soak stage; production releases are cut separately by
+# tagging a version, which triggers release.yml.
+#
+# Required GitHub Actions secrets:
+#   EXPO_TOKEN         - https://expo.dev/accounts/jaw_ari/settings/access-tokens
+#   ASC_API_KEY_BASE64 - base64 of the App Store Connect .p8 key
+#
+# Free EAS plan: 15 iOS builds/month. Add [skip ci] to a commit message to skip.
+
+name: Beta - TestFlight
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'src/**'
+      - 'assets/**'
+      - 'constants/**'
+      - 'components/**'
+      - 'locales/**'
+      - 'app.json'
+      - 'eas.json'
+      - 'package.json'
+      - 'package-lock.json'
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: 'EAS build profile'
+        required: true
+        default: 'production'
+        type: choice
+        options: [preview, production]
+
+# One build at a time. A second push while a build is queued waits, not cancels.
+concurrency:
+  group: eas-ios-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gate:
+    name: Quality gate
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  build-and-submit:
+    name: EAS iOS -> TestFlight
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write App Store Connect API key
+        env:
+          ASC_API_KEY_BASE64: ${{ secrets.ASC_API_KEY_BASE64 }}
+        run: |
+          # eas.json submit.ios.ascApiKeyPath points here. Keep the key out of git
+          # (secrets/ is gitignored) and only materialize it on the runner.
+          KEY_ID="${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}"
+          mkdir -p secrets
+          echo "$ASC_API_KEY_BASE64" | base64 -d > "secrets/AuthKey_${KEY_ID}.p8"
+          chmod 600 "secrets/AuthKey_${KEY_ID}.p8"
+
+      - name: EAS build and auto-submit to TestFlight
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          PROFILE="${{ github.event.inputs.profile || 'production' }}"
+          echo "Building profile: $PROFILE"
+          eas build \
+            --platform ios \
+            --profile "$PROFILE" \
+            --non-interactive \
+            --auto-submit \
+            --no-wait

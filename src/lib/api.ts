@@ -1,11 +1,14 @@
 import * as SecureStore from 'expo-secure-store';
 import Constants from 'expo-constants';
 
+const PROXY_FALLBACK = 'https://handygo.vercel.app/backend/api/v1';
+
 const extra = Constants.expoConfig?.extra ?? {};
 const API_BASE_URL =
-  (extra.apiBaseUrl as string) ||
   process.env.EXPO_PUBLIC_API_BASE_URL ||
-  'https://api.handygo.ae/api/v1';
+  process.env.EXPO_PUBLIC_API_URL ||
+  (extra.apiBaseUrl as string) ||
+  PROXY_FALLBACK;
 
 async function getHeaders(): Promise<Record<string, string>> {
   const token = await SecureStore.getItemAsync('token');
@@ -16,12 +19,12 @@ async function getHeaders(): Promise<Record<string, string>> {
   return headers;
 }
 
-async function request<T>(method: string, path: string, body?: any): Promise<T> {
+async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const headers = await getHeaders();
   const res = await fetch(`${API_BASE_URL}${path}`, {
     method,
     headers,
-    body: body ? JSON.stringify(body) : undefined,
+    body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) {
     const text = await res.text();
@@ -33,9 +36,9 @@ async function request<T>(method: string, path: string, body?: any): Promise<T> 
 
 export const api = {
   get: <T>(path: string) => request<T>('GET', path),
-  post: <T>(path: string, body?: any) => request<T>('POST', path, body),
-  put: <T>(path: string, body?: any) => request<T>('PUT', path, body),
-  patch: <T>(path: string, body?: any) => request<T>('PATCH', path, body),
+  post: <T>(path: string, body?: unknown) => request<T>('POST', path, body),
+  put: <T>(path: string, body?: unknown) => request<T>('PUT', path, body),
+  patch: <T>(path: string, body?: unknown) => request<T>('PATCH', path, body),
   delete: <T>(path: string) => request<T>('DELETE', path),
 };
 

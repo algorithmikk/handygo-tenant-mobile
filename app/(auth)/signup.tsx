@@ -17,12 +17,14 @@ import { useTranslation } from 'react-i18next';
 import { Home, Mail, Lock, User, Phone } from 'lucide-react-native';
 import { Colors } from '@/constants/Colors';
 import { api } from '@/src/lib/api';
-import * as SecureStore from 'expo-secure-store';
+import { useAuth } from '@/src/context/AuthContext';
+import { notificationService } from '@/src/services/notificationService';
 
 const WEB_SIGNUP_URL = 'https://handygo.vercel.app/signup/tenant';
 
 export default function SignupScreen() {
   const { t } = useTranslation();
+  const { setSession } = useAuth();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
@@ -61,10 +63,9 @@ export default function SignupScreen() {
         throw new Error(raw?.error || t('auth.signupError'));
       }
       const userData = raw.user || raw;
-      await SecureStore.setItemAsync('token', raw.token);
-      await SecureStore.setItemAsync(
-        'user',
-        JSON.stringify({
+      await setSession({
+        token: raw.token,
+        user: {
           id: userData.id,
           email: userData.email,
           firstName: userData.firstName,
@@ -72,8 +73,10 @@ export default function SignupScreen() {
           phone: userData.phoneNumber || phoneNumber,
           role: 'TENANT',
           createdAt: userData.createdAt,
-        }),
-      );
+        },
+        tenant: raw.tenant,
+      });
+      void notificationService.registerForPushNotifications();
       router.replace('/(tabs)');
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : t('auth.signupError'));
@@ -240,7 +243,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 16,
-    backgroundColor: Colors.amber[500],
+    backgroundColor: Colors.primary[500],
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 12,
@@ -262,22 +265,23 @@ const styles = StyleSheet.create({
   input: { flex: 1, color: Colors.white, fontSize: 15 },
   loginBtn: {
     marginTop: 8,
-    backgroundColor: Colors.amber[500],
-    borderRadius: 10,
-    paddingVertical: 14,
+    backgroundColor: Colors.primary[500],
+    borderRadius: 14,
+    height: 52,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   loginBtnDisabled: { opacity: 0.6 },
-  loginBtnText: { color: Colors.gray[950], fontWeight: '700', fontSize: 16 },
+  loginBtnText: { color: Colors.white, fontWeight: '700', fontSize: 16 },
   errorBox: {
-    backgroundColor: 'rgba(244,63,94,0.15)',
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: Colors.red[500] + '20',
+    borderRadius: 10,
+    padding: 12,
   },
-  errorText: { color: '#fb7185', fontSize: 13 },
+  errorText: { color: Colors.red[400], fontSize: 13 },
   demoHint: { flexDirection: 'row', justifyContent: 'center', marginTop: 8 },
   demoText: { color: Colors.gray[500], fontSize: 13 },
-  linkText: { color: Colors.amber[400], fontSize: 13, fontWeight: '600' },
+  linkText: { color: Colors.primary[400], fontSize: 13, fontWeight: '600' },
   webLink: { alignItems: 'center', marginTop: 4 },
   webLinkText: { color: Colors.blue[400], fontSize: 13 },
 });
