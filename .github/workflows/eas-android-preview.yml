@@ -11,21 +11,8 @@
 
 name: Beta - Android EAS Internal
 
+# Manual only (sideload APK). Push to main uses ci.yml Play Internal AAB, not this.
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'app/**'
-      - 'src/**'
-      - 'assets/**'
-      - 'constants/**'
-      - 'components/**'
-      - 'locales/**'
-      - 'app.json'
-      - 'app.config.js'
-      - 'eas.json'
-      - 'package.json'
-      - 'package-lock.json'
   workflow_dispatch:
     inputs:
       profile:

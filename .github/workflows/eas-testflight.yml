@@ -12,20 +12,8 @@
 
 name: Beta - TestFlight
 
+# Manual only. Push to main is handled by ci.yml (one run: verify + EAS).
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'app/**'
-      - 'src/**'
-      - 'assets/**'
-      - 'constants/**'
-      - 'components/**'
-      - 'locales/**'
-      - 'app.json'
-      - 'eas.json'
-      - 'package.json'
-      - 'package-lock.json'
   workflow_dispatch:
     inputs:
       profile:

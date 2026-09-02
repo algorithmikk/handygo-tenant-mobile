@@ -1,8 +1,13 @@
-# Quality gate for HandyGo Tenant Mobile.
+# One workflow per commit — HandyGo Tenant Mobile.
 #
-# Runs on every pull request and on pushes to main. The release workflows depend
-# on this job, so nothing reaches TestFlight, Play Internal, or the stores without
-# passing.
+# pull_request / workflow_call (release tags): quality gate only.
+# push to main: quality gate, then queue EAS iOS → TestFlight and Android → Play Internal.
+#
+# EAS is configured (eas.json production + submit). Builds are queued with --no-wait;
+# Expo/Apple/Google do the rest. Store production still requires a v* tag (release.yml).
+#
+# Secrets: EXPO_TOKEN, ASC_API_KEY_BASE64, GOOGLE_SERVICE_ACCOUNT_KEY,
+#          GOOGLE_SERVICES_JSON_BASE64, ASC_DEMO_PASSWORD
 
 name: CI
 
@@ -13,7 +18,7 @@ on:
   workflow_call:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -53,3 +58,108 @@ jobs:
 
       - name: Validate Play listing metadata
         run: npm run check:play-metadata
+
+  eas-ios:
+    name: EAS iOS → TestFlight
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write App Store Connect API key
+        env:
+          ASC_API_KEY_BASE64: ${{ secrets.ASC_API_KEY_BASE64 }}
+        run: |
+          KEY_ID="${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}"
+          mkdir -p secrets
+          echo "$ASC_API_KEY_BASE64" | base64 -d > "secrets/AuthKey_${KEY_ID}.p8"
+          chmod 600 "secrets/AuthKey_${KEY_ID}.p8"
+
+      - name: Queue EAS iOS build + TestFlight submit
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas build \
+            --platform ios \
+            --profile production \
+            --non-interactive \
+            --auto-submit \
+            --no-wait
+
+  eas-android:
+    name: EAS Android → Play Internal
+    needs: verify
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write Play service account key
+        id: play_key
+        env:
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ -z "$GOOGLE_SERVICE_ACCOUNT_KEY" ]; then
+            echo "::notice::GOOGLE_SERVICE_ACCOUNT_KEY unset — skipping Play Internal"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          mkdir -p secrets
+          echo "$GOOGLE_SERVICE_ACCOUNT_KEY" | base64 -d > secrets/google-play-key.json
+          chmod 600 secrets/google-play-key.json
+          echo "skip=false" >> "$GITHUB_OUTPUT"
+
+      - name: Write google-services.json
+        if: steps.play_key.outputs.skip != 'true'
+        env:
+          GOOGLE_SERVICES_JSON_BASE64: ${{ secrets.GOOGLE_SERVICES_JSON_BASE64 }}
+        run: |
+          if [ -z "$GOOGLE_SERVICES_JSON_BASE64" ]; then
+            echo "::warning::GOOGLE_SERVICES_JSON_BASE64 not set — Android push may fail"
+            exit 0
+          fi
+          echo "$GOOGLE_SERVICES_JSON_BASE64" | base64 -d > google-services.json
+          chmod 600 google-services.json
+
+      - name: Queue EAS Android build + Play Internal submit
+        if: steps.play_key.outputs.skip != 'true'
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          eas build \
+            --platform android \
+            --profile production \
+            --non-interactive \
+            --auto-submit \
+            --no-wait
