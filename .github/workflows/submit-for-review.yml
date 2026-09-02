@@ -30,7 +30,7 @@ jobs:
     env:
       ASC_KEY_ID: ${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}
       ASC_ISSUER_ID: ${{ vars.ASC_ISSUER_ID || '73d61e3d-d8c6-4a29-af54-9b71dcbcb92b' }}
-      ASC_APP_ID: ${{ vars.ASC_APP_ID || '6770624503' }}
+      ASC_APP_ID: ${{ vars.ASC_APP_ID || '6797751128' }}
 
     steps:
       - name: Checkout

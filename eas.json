@@ -44,7 +44,10 @@
         "appleTeamId": "NM4ZT8W7HH",
         "ascApiKeyPath": "./secrets/AuthKey_A945G7BMSZ.p8",
         "ascApiKeyId": "A945G7BMSZ",
-        "ascApiKeyIssuerId": "73d61e3d-d8c6-4a29-af54-9b71dcbcb92b"
+        "ascApiKeyIssuerId": "73d61e3d-d8c6-4a29-af54-9b71dcbcb92b",
+        "groups": [
+          "Internal"
+        ]
       },
       "android": {
         "serviceAccountKeyPath": "./secrets/google-play-key.json",

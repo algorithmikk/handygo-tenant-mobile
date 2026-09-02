@@ -70,6 +70,14 @@ jobs:
       - name: EAS build and auto-submit to TestFlight
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          # Prefer local ASC key from secrets/ over incomplete EAS-hosted key
+          # (remote key prompts for Apple Team ID and breaks --non-interactive).
+          EXPO_ASC_API_KEY_PATH: ./secrets/AuthKey_${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}.p8
+          EXPO_ASC_KEY_ID: ${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}
+          EXPO_ASC_ISSUER_ID: ${{ vars.ASC_ISSUER_ID || '73d61e3d-d8c6-4a29-af54-9b71dcbcb92b' }}
+          EXPO_APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID || 'NM4ZT8W7HH' }}
+          EXPO_APPLE_TEAM_TYPE: INDIVIDUAL
+          EXPO_APPLE_ID: jawadarifpro@gmail.com
         run: |
           PROFILE="${{ github.event.inputs.profile || 'production' }}"
           echo "Building profile: $PROFILE"

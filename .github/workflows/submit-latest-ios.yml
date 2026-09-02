@@ -1,0 +1,60 @@
+# Submit the latest finished EAS iOS build to TestFlight (no rebuild).
+# Use when a build succeeded but auto-submit failed ASC auth.
+
+name: Submit latest iOS → TestFlight
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: submit-latest-ios-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  submit:
+    name: EAS submit iOS
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install EAS CLI
+        run: npm install -g eas-cli@latest
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Write App Store Connect API key
+        env:
+          ASC_API_KEY_BASE64: ${{ secrets.ASC_API_KEY_BASE64 }}
+        run: |
+          KEY_ID="${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}"
+          mkdir -p secrets
+          echo "$ASC_API_KEY_BASE64" | base64 -d > "secrets/AuthKey_${KEY_ID}.p8"
+          chmod 600 "secrets/AuthKey_${KEY_ID}.p8"
+
+      - name: Submit latest iOS build to TestFlight
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          EXPO_ASC_API_KEY_PATH: ./secrets/AuthKey_${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}.p8
+          EXPO_ASC_KEY_ID: ${{ vars.ASC_KEY_ID || 'A945G7BMSZ' }}
+          EXPO_ASC_ISSUER_ID: ${{ vars.ASC_ISSUER_ID || '73d61e3d-d8c6-4a29-af54-9b71dcbcb92b' }}
+          EXPO_APPLE_TEAM_ID: ${{ vars.APPLE_TEAM_ID || 'NM4ZT8W7HH' }}
+          EXPO_APPLE_TEAM_TYPE: INDIVIDUAL
+          EXPO_APPLE_ID: jawadarifpro@gmail.com
+        run: |
+          eas submit \
+            --platform ios \
+            --latest \
+            --profile production \
+            --non-interactive \
+            --groups Internal \
+            --wait
